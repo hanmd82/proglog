@@ -51,7 +51,7 @@ func (s *httpServer) handleProduce(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		http.error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -64,7 +64,7 @@ func (s *httpServer) handleProduce(w http.ResponseWriter, r *http.Request) {
 	res := ProduceResponse{Offset: offset}
 	err = json.NewEncoder(w).Encode(res)
 	if err != nil {
-		http.error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }
