@@ -12,4 +12,6 @@ Notes
 
 Further Reading
 
+- https://github.com/gogo/protobuf
+
 ---
