@@ -24,3 +24,6 @@
     cd internal/log
     go test -c && ./log.test
     ```
+- Create an `index` struct, which is a simple wrapper around a physical file and a memory-mapped file.
+- A graceful shutdown occurs when a service finishes its ongoing tasks, performs its processes to ensure there’s no data loss, and prepares for a restart.
+- Handle ungraceful shutdowns by performing a sanity check when the service restarts. If there is corrupted data, rebuild the data or replicate the data from an uncorrupted source.
