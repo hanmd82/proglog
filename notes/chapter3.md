@@ -11,19 +11,31 @@
 
 - Build the log from bottom up, starting with the store and index files, then the segment, and finally the log.
 - Terminology:
-  - Record: the data stored in the log.
-  - Store: the file where records are stored in.
-  - Index: the file where index entries are stored in.
-  - Segment: the abstraction that ties a store and an index together.
-  - Log: the abstraction that ties all the segments together.
+  - `Record`: the data stored in the log.
+  - `Store`: the file where records are stored in.
+  - `Index`: the file where index entries are stored in.
+  - `Segment`: the abstraction that ties a store and an index together.
+  - `Log`: the abstraction that ties all the segments together.
+
+Running tests:
+  ```bash
+  cd internal/log
+  go test -c && ./log.test
+  ```
+
+---
 
 - Create a `store` struct, which is a simple wrapper around a file with two APIs to append and read bytes to and from the file.
 - Write to the buffered writer instead of directly to the file to reduce the number of system calls and improve performance.
-- Run tests:
-    ```bash
-    cd internal/log
-    go test -c && ./log.test
-    ```
+
+---
+
 - Create an `index` struct, which is a simple wrapper around a physical file and a memory-mapped file.
 - A graceful shutdown occurs when a service finishes its ongoing tasks, performs its processes to ensure there’s no data loss, and prepares for a restart.
 - Handle ungraceful shutdowns by performing a sanity check when the service restarts. If there is corrupted data, rebuild the data or replicate the data from an uncorrupted source.
+
+---
+
+- The `segment` wraps the `index` and `store` types to coordinate operations across the two:
+- When the log appends a record to the active segment, the segment needs to write the data to its store and add a new entry in the index.
+- For reads, the segment needs to look up the entry from the index and then fetch the data from the store.
