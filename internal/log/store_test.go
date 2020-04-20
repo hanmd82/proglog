@@ -29,6 +29,9 @@ func TestStore(t *testing.T) {
 	s, err = newStore(f)
 	require.NoError(t, err)
 	testRead(t, s)
+
+	err = s.Close()
+	require.NoError(t, err)
 }
 
 func testAppend(t *testing.T, s *store) {

@@ -109,11 +109,22 @@ func (s *segment) IsMaxed() bool {
 		s.index.size >= s.config.Segment.MaxIndexBytes
 }
 
+// Close() delegates to the store and index.
+func (s *segment) Close() error {
+	if err := s.index.Close(); err != nil {
+		return err
+	}
+	if err := s.store.Close(); err != nil {
+		return err
+	}
+	return nil
+}
+
 // Remove() closes the segment and removes the index and store files.
 func (s *segment) Remove() error {
-	// if err := s.Close(); err != nil {
-	// 	return err
-	// }
+	if err := s.Close(); err != nil {
+		return err
+	}
 	if err := os.Remove(s.index.Name()); err != nil {
 		return err
 	}

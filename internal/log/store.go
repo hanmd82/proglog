@@ -78,3 +78,12 @@ func (s *store) ReadAt(pos uint64) ([]byte, error) {
 
 	return b, nil
 }
+
+// Close() checks that the persisted file has flushed its contents to stable storage,
+// then closes the file.
+func (s *store) Close() error {
+	if err := s.File.Sync(); err != nil {
+		return err
+	}
+	return s.File.Close()
+}

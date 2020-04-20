@@ -25,17 +25,17 @@ Running tests:
 
 ---
 
-- Create a `store` struct, which is a simple wrapper around a file with two APIs to append and read bytes to and from the file.
+- Create a `store` type, which is a simple wrapper around a file with two APIs to append and read bytes to and from the file.
 - Write to the buffered writer instead of directly to the file to reduce the number of system calls and improve performance.
 
 ---
 
-- Create an `index` struct, which is a simple wrapper around a physical file and a memory-mapped file.
+- Create an `index` type, which is a simple wrapper around a physical file and a memory-mapped file.
 - A graceful shutdown occurs when a service finishes its ongoing tasks, performs its processes to ensure there’s no data loss, and prepares for a restart.
 - Handle ungraceful shutdowns by performing a sanity check when the service restarts. If there is corrupted data, rebuild the data or replicate the data from an uncorrupted source.
 
 ---
 
-- The `segment` wraps the `index` and `store` types to coordinate operations across the two:
+- The `segment` type wraps the `index` and `store` types to coordinate operations across the two:
 - When the log appends a record to the active segment, the segment needs to write the data to its store and add a new entry in the index.
 - For reads, the segment needs to look up the entry from the index and then fetch the data from the store.
