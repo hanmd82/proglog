@@ -18,3 +18,8 @@ Further Reading
 - https://pkg.go.dev/github.com/tysontate/gommap
 
 ---
+
+Others
+- https://github.com/mainflux/mainflux
+
+---
