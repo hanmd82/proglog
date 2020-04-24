@@ -6,3 +6,4 @@
 - Go’s gRPC implementation has a `status` package which can be used to build errors with status codes, and include other data.
 - To create an error with a status code, create the `error` with the `Error` function from the `status` package, and pass the relevant code from the `codes` package that matches the type of error.
 - Add a custom error type `ErrOffsetOutOfRange` that the server will send back to the client when the client tries to consume an offset that’s outside of the log. `ErrOffsetOutOfRange` includes a localized message, a status code, and an error message.
+- use Interfaces for Dependency Inversion, so that the log service can use any log implementation that satisfies the log interface at runtime.
