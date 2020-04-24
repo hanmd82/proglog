@@ -1,97 +1,103 @@
 package server
 
 import (
-	"encoding/json"
-	"net/http"
+	"context"
 
-	"github.com/gorilla/mux"
+	api "github.com/hanmd82/proglog/api/v1"
+	"google.golang.org/grpc"
 )
 
-func NewHTTPServer(addr string) *http.Server {
-	httpsrv := newHTTPServer()
+// Ensure that the *grpcServer type satisfies the api.LogServer interface
+var _ api.LogServer = (*grpcServer)(nil)
 
-	r := mux.NewRouter()
-	r.HandleFunc("/", httpsrv.handleProduce).Methods("POST")
-	r.HandleFunc("/", httpsrv.handleConsume).Methods("GET")
+type Config struct {
+	CommitLog CommitLog
+}
 
-	return &http.Server{
-		Addr:    addr,
-		Handler: r,
+type grpcServer struct {
+	*Config
+}
+
+func newgrpcServer(config *Config) (srv *grpcServer, err error) {
+	srv = &grpcServer{
+		Config: config,
 	}
+	return srv, nil
 }
 
-type httpServer struct {
-	Log *Log
-}
+// // Implement the LogServer interface
+// type LogServer interface {
+// 	Produce(context.Context, *ProduceRequest) (*ProduceResponse, error)
+// 	Consume(context.Context, *ConsumeRequest) (*ConsumeResponse, error)
+// 	ConsumeStream(*ConsumeRequest, Log_ConsumeStreamServer) error
+// 	ProduceStream(Log_ProduceStreamServer) error
+// }
 
-func newHTTPServer() *httpServer {
-	return &httpServer{
-		Log: NewLog(),
-	}
-}
-
-type ProduceRequest struct {
-	Record Record `json:"record"`
-}
-
-type ProduceResponse struct {
-	Offset uint64 `json:"offset"`
-}
-
-type ConsumeRequest struct {
-	Offset uint64 `json:"offset"`
-}
-
-type ConsumeResponse struct {
-	Record Record `json:"record"`
-}
-
-func (s *httpServer) handleProduce(w http.ResponseWriter, r *http.Request) {
-	var req ProduceRequest
-
-	err := json.NewDecoder(r.Body).Decode(&req)
+func (s *grpcServer) Produce(
+	ctx context.Context,
+	req *api.ProduceRequest,
+) (*api.ProduceResponse, error) {
+	offset, err := s.CommitLog.Append(req.Record)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return nil, err
 	}
+	return &api.ProduceResponse{Offset: offset}, nil
+}
 
-	offset, err := s.Log.Append(req.Record)
+func (s *grpcServer) Consume(
+	ctx context.Context,
+	req *api.ConsumeRequest,
+) (*api.ConsumeResponse, error) {
+	record, err := s.CommitLog.Read(req.Offset)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, err
 	}
+	return &api.ConsumeResponse{Record: record}, nil
+}
 
-	res := ProduceResponse{Offset: offset}
-	err = json.NewEncoder(w).Encode(res)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+// ProduceStream(api.Log_ProduceStreamServer) implements bidirectional streaming RPC
+func (s *grpcServer) ProduceStream(
+	stream api.Log_ProduceStreamServer,
+) error {
+	for {
+		req, err := stream.Recv()
+		if err != nil {
+			return err
+		}
+
+		res, err := s.Produce(stream.Context(), req)
+		if err != nil {
+			return err
+		}
+
+		if err = stream.Send(res); err != nil {
+			return err
+		}
 	}
 }
 
-func (s *httpServer) handleConsume(w http.ResponseWriter, r *http.Request) {
-	var req ConsumeRequest
-
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	record, err := s.Log.Read(req.Offset)
-	if err == ErrOffsetNotFound {
-		http.Error(w, err.Error(), http.StatusNotFound)
-		return
-	}
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	res := ConsumeResponse{Record: record}
-	err = json.NewEncoder(w).Encode(res)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+// ConsumeStream(*api.ConsumeRequest, api.Log_ConsumeStreamServer) implements server-side streaming RPC
+func (s *grpcServer) ConsumeStream(
+	req *api.ConsumeRequest,
+	stream api.Log_ConsumeStreamServer,
+) error {
+	for {
+		select {
+		case <-stream.Context().Done():
+			return nil
+		default:
+			res, err := s.Consume(stream.Context(), req)
+			switch err.(type) {
+			case nil:
+			case api.ErrOffsetOutOfRange:
+				continue
+			default:
+				return err
+			}
+			if err = stream.Send(res); err != nil {
+				return err
+			}
+			req.Offset++
+		}
 	}
 }
