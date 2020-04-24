@@ -5,3 +5,4 @@
 - A gRPC service is essentially a group of related RPC endpoints. Creating a gRPC service involves defining it in protobuf and then compiling protocol buffers into code comprising the client and server stubs.
 - Go’s gRPC implementation has a `status` package which can be used to build errors with status codes, and include other data.
 - To create an error with a status code, create the `error` with the `Error` function from the `status` package, and pass the relevant code from the `codes` package that matches the type of error.
+- Add a custom error type `ErrOffsetOutOfRange` that the server will send back to the client when the client tries to consume an offset that’s outside of the log. `ErrOffsetOutOfRange` includes a localized message, a status code, and an error message.
