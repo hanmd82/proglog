@@ -25,6 +25,19 @@ func newgrpcServer(config *Config) (srv *grpcServer, err error) {
 	return srv, nil
 }
 
+// NewGRPCServer(*Config) instantiates the Log service, creates a gRPC server,
+// and registers the Log service to the gRPC server
+func NewGRPCServer(config *Config) (*grpc.Server, error) {
+	gsrv := grpc.NewServer()
+	srv, err := newgrpcServer(config)
+	if err != nil {
+		return nil, err
+	}
+
+	api.RegisterLogServer(gsrv, srv)
+	return gsrv, nil
+}
+
 // // Implement the LogServer interface
 // type LogServer interface {
 // 	Produce(context.Context, *ProduceRequest) (*ProduceResponse, error)
