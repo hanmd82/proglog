@@ -47,3 +47,6 @@
   go test -c
   ./server.test
   ```
+
+- Define an `Authorizer` type whose sole method `Authorize` defers to Casbin’s `Enforce` function.
+- To test authorization, we need multiple clients with different permissions and multiple client certs.

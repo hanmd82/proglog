@@ -5,6 +5,7 @@ replace github.com/coreos/bbolt => go.etcd.io/bbolt v1.3.4
 go 1.13
 
 require (
+	github.com/casbin/casbin v1.9.1
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang/protobuf v1.4.1 // indirect
