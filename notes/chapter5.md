@@ -30,3 +30,20 @@
 - CloudFlare has written a toolkit called CFSSL that can be used for signing, verifying, and bundling TLS certificates so that it can act as its own CA for internal services:
   - `cfssl` to sign, verify, and bundle TLS certificates and output the results as JSON
   - `cfssljson` to take that JSON output and split them into separate key, certificate, CSR, and bundle files
+    ```bash
+    go get -u github.com/cloudflare/cfssl/cmd/cfssl
+    go get -u github.com/cloudflare/cfssl/cmd/cfssljson
+    ```
+
+- Create a `config` package to make it easy to reference SSL config files
+  ```bash
+  make init
+  make gencert
+
+  ls $HOME/.proglog
+  # ca-key.pem      ca.csr          ca.pem          server-key.pem  server.csr      server.pem
+
+  cd ./internal/server
+  go test -c
+  ./server.test
+  ```

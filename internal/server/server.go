@@ -25,15 +25,15 @@ func newgrpcServer(config *Config) (srv *grpcServer, err error) {
 	return srv, nil
 }
 
-// NewGRPCServer(*Config) instantiates the Log service, creates a gRPC server,
+// NewGRPCServer(*Config, ...grpc.ServerOption) instantiates the Log service
+// creates a gRPC server with given gRPC server options,
 // and registers the Log service to the gRPC server
-func NewGRPCServer(config *Config) (*grpc.Server, error) {
-	gsrv := grpc.NewServer()
+func NewGRPCServer(config *Config, opts ...grpc.ServerOption) (*grpc.Server, error) {
+	gsrv := grpc.NewServer(opts...)
 	srv, err := newgrpcServer(config)
 	if err != nil {
 		return nil, err
 	}
-
 	api.RegisterLogServer(gsrv, srv)
 	return gsrv, nil
 }
