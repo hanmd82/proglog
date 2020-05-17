@@ -35,7 +35,7 @@ func SetupTLSConfig(cfg TLSConfig) (*tls.Config, error) {
 		}
 		if cfg.Server {
 			tlsConfig.ClientCAs = ca
-			tlsConfig.ClientAuth = tls.VerifyClientCertIfGiven
+			tlsConfig.ClientAuth = tls.RequireAndVerifyClientCert
 		} else {
 			tlsConfig.RootCAs = ca
 		}
