@@ -9,9 +9,11 @@ require (
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang/protobuf v1.4.1 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
+	github.com/hashicorp/serf v0.8.5
 	github.com/kr/text v0.2.0 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/stretchr/testify v1.5.1
+	github.com/travisjeffery/go-dynaport v1.0.0
 	github.com/tysontate/gommap v0.0.0-20190103205956-899e1273fb5c
 	golang.org/x/net v0.0.0-20200513185701-a91f0712d120 // indirect
 	golang.org/x/sys v0.0.0-20200513112337-417ce2331b5c // indirect

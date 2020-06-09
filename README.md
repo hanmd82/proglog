@@ -18,6 +18,7 @@ Further Reading
 - https://pkg.go.dev/github.com/tysontate/gommap
 - https://godoc.org/google.golang.org/grpc#ServerOption
 - https://github.com/casbin/casbin
+- https://github.com/hashicorp/serf
 
 ---
 
