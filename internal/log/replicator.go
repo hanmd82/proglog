@@ -128,6 +128,20 @@ func (r *Replicator) init() {
 	}
 }
 
+func (r *Replicator) Close() error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.init()
+
+	if r.closed {
+		return nil
+	}
+
+	r.closed = true
+	close(r.close)
+	return nil
+}
+
 func (r *Replicator) err(err error) {
 	log.Printf("[ERROR] proglog: %v", err)
 }

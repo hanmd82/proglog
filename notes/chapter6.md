@@ -46,3 +46,4 @@ go test -c
   - otherwise, may need to export constructor functions, or getter/setter functions on fields in the struct
 - `chan struct{}` is typically used as a signalling channel
   - `leave chan struct{}` is used to signal that the destination server has left the cluster and current server should stop replicating from it
+- use the `dynaport` library to allocate two ports: one for gRPC log connections and one for Serf service discovery connections
