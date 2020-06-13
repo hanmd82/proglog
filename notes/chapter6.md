@@ -34,4 +34,15 @@ cd ./internal/discovery
 go test -c
 ./discovery.test
 ```
+---
 
+- Replication can make a service more resilient to failures. For example, if a node’s disk fails and its data cannot be recovered, there is a copy of the data on another disk
+- Enable the servers to replicate each other when they discover each other
+- Discovery is important because the discovery events trigger other processes, like replication and consensus
+- When a server joins the cluster, the replicator component will connect to the server and run a loop that consumes from the discovered server and produces to the local server.
+  - pull-based replication: consumer periodically polls the data source to check if it has new data to consume
+  - push-based replication: the data source pushes the data to its replicas
+- Lazy initialization gives structs a useful zero value, which reduces the API’s size and complexity while maintaining the same functionality
+  - otherwise, may need to export constructor functions, or getter/setter functions on fields in the struct
+- `chan struct{}` is typically used as a signalling channel
+  - `leave chan struct{}` is used to signal that the destination server has left the cluster and current server should stop replicating from it
