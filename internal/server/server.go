@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -12,7 +13,7 @@ func NewHTTPServer(addr string) *http.Server {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/", httpsrv.handleProduce).Methods("POST")
-	r.HandleFunc("/", httpsrv.handleConsume).Methods("GET")
+	r.HandleFunc("/{offset:[0-9]+}", httpsrv.handleConsume).Methods("GET")
 
 	return &http.Server{
 		Addr:    addr,
@@ -35,10 +36,6 @@ type ProduceRequest struct {
 }
 
 type ProduceResponse struct {
-	Offset uint64 `json:"offset"`
-}
-
-type ConsumeRequest struct {
 	Offset uint64 `json:"offset"`
 }
 
@@ -70,15 +67,15 @@ func (s *httpServer) handleProduce(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *httpServer) handleConsume(w http.ResponseWriter, r *http.Request) {
-	var req ConsumeRequest
+	vars := mux.Vars(r)
 
-	err := json.NewDecoder(r.Body).Decode(&req)
+	offset, err := strconv.ParseUint(vars["offset"], 10, 64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	record, err := s.Log.Read(req.Offset)
+	record, err := s.Log.Read(offset)
 	if err == ErrOffsetNotFound {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
